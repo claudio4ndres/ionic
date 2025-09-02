@@ -1,0 +1,116 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Buscar Pokémon
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Buscar Pokémon</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="search-container">
+    <!-- Barra de búsqueda -->
+    <ion-searchbar 
+      placeholder="Ingresa el nombre del Pokémon..."
+      [(ngModel)]="searchTerm"
+      (keypress)="onSearchKeyPress($event)"
+      debounce="300">
+    </ion-searchbar>
+
+    <!-- Botones de acción -->
+    <div class="action-buttons">
+      <ion-button 
+        expand="block" 
+        (click)="searchPokemon()"
+        [disabled]="isSearching || !searchTerm.trim()">
+        <ion-icon name="search" slot="start"></ion-icon>
+        {{ isSearching ? 'Buscando...' : 'Buscar' }}
+      </ion-button>
+      
+      <ion-button 
+        expand="block" 
+        fill="outline" 
+        color="medium"
+        (click)="clearSearch()"
+        [disabled]="isSearching">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Limpiar
+      </ion-button>
+    </div>
+
+    <!-- Spinner de carga -->
+    <div *ngIf="isSearching" class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Buscando Pokémon...</p>
+    </div>
+
+    <!-- Resultados de búsqueda -->
+    <div *ngIf="!isSearching && searchResults.length > 0" class="results-container">
+      <h3>Resultado de búsqueda:</h3>
+      <ion-list>
+        <ion-item 
+          *ngFor="let pokemon of searchResults" 
+          button 
+          (click)="viewPokemonDetails(pokemon)">
+          <ion-avatar slot="start">
+            <img [src]="getPokemonImage(pokemon)" [alt]="pokemon.name" />
+          </ion-avatar>
+          <ion-label>
+            <h2>{{ pokemon.name | titlecase }}</h2>
+            <p>Tipo: {{ getPokemonTypes(pokemon) | titlecase }}</p>
+            <p>ID: #{{ pokemon.id.toString().padStart(3, '0') }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Mensaje cuando no hay resultados -->
+    <div *ngIf="!isSearching && hasSearched && searchResults.length === 0" class="no-results">
+      <ion-icon name="sad-outline" size="large"></ion-icon>
+      <p>No se encontraron resultados</p>
+      <p class="suggestion">Intenta con otro nombre de Pokémon</p>
+    </div>
+
+    <!-- Mensaje inicial -->
+    <div *ngIf="!hasSearched && !isSearching" class="welcome-message">
+      <ion-icon name="search-outline" size="large"></ion-icon>
+      <h3>Busca tu Pokémon favorito</h3>
+      <p>Ingresa el nombre exacto del Pokémon que quieres encontrar</p>
+      <div class="examples">
+        <p><strong>Ejemplos:</strong></p>
+        <ion-button 
+          size="small" 
+          fill="outline" 
+          (click)="searchTerm = 'pikachu'; searchPokemon()">
+          Pikachu
+        </ion-button>
+        <ion-button 
+          size="small" 
+          fill="outline" 
+          (click)="searchTerm = 'charizard'; searchPokemon()">
+          Charizard
+        </ion-button>
+        <ion-button 
+          size="small" 
+          fill="outline" 
+          (click)="searchTerm = 'blastoise'; searchPokemon()">
+          Blastoise
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert para mensajes de error -->
+  <ion-alert
+    [isOpen]="showAlert"
+    [header]="'Información'"
+    [message]="alertMessage"
+    [buttons]="['OK']"
+    (didDismiss)="closeAlert()">
+  </ion-alert>
+</ion-content>
